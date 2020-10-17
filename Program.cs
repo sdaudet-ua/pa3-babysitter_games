@@ -7,6 +7,7 @@ namespace fall_2020_starter_code
         static void Main(string[] args)
         {
             //Priming Read for Sentinel Value (Main Menu)
+            Console.Clear();
             int exit = 0;
             int[] energyPoints = new int[2];
             energyPoints[0] = 200;
@@ -24,15 +25,15 @@ namespace fall_2020_starter_code
                     break;
 
                     case 2:
-                    MotherMayI();
+                    MotherMayI(energyPoints,score,wins,games);
                     break;
 
                     case 3:
-                    Scoreboard();
+                    Scoreboard(energyPoints,score,wins,games);
                     break;
 
                     case 4:
-                    ResetGame();
+                    ResetGame(energyPoints,score,wins,games);
                     break;
 
                     case 5:
@@ -44,18 +45,20 @@ namespace fall_2020_starter_code
         static int ChooseProgram()
         {
             //This method displays the main menu and returns the chosen value to the main method for selection.
+            Console.Write("\n\n\n");
             Console.WriteLine("1:   Play Pick Up Sticks");
             Console.WriteLine("2:   Play Mother, May I");
             Console.WriteLine("3:   View Scoreboard");
             Console.WriteLine("4:   Reset Scoreboard");
-            Console.WriteLine("5:   Exit Game");
+            Console.WriteLine("5:   Exit Game\n\n");
             return int.Parse(Console.ReadLine());
-        }   
+        }
         static void PickUpSticks(int[] energyPoints,int[] score,int[] wins,int[] games)
         {
             energyPoints[1] = energyPoints[0];
             int playGame = 1;
-            while (energyPoints[1] < 300 && energyPoints[0] > 0)
+            int exit = 0;
+            while (energyPoints[1] < 300 && energyPoints[0] > 0 && exit != 1)
             {            
                 string lastPlayer = "user";
                 int currentPlayer = 0;
@@ -65,23 +68,24 @@ namespace fall_2020_starter_code
                     int initialStickQuantity = stickQuantity;
                     while (stickQuantity > 0)
                     {
-                        while (currentPlayer == 0)
+                        while (currentPlayer == 0 && stickQuantity > 0)
                         {
                             int pickupQuantity = GetQuantity("pickup");
                             lastPlayer = "user";
-                            stickQuantity -= pickupQuantity;
                             score[0] += pickupQuantity;
                             energyPoints[1] -= pickupQuantity;
+                            stickQuantity -= pickupQuantity;
                             currentPlayer = 1;
                         }
-                        while (currentPlayer == 1)
+                        while (currentPlayer == 1 && stickQuantity >0)
                         {
                             int pickupQuantity = ComputerPickupQuantity(stickQuantity);
                             lastPlayer = "computer";
-                            stickQuantity -= pickupQuantity;
                             score[1] += pickupQuantity;
                             energyPoints[1] += pickupQuantity;
                             Console.WriteLine($"The computer picked up {pickupQuantity} sticks.");
+                            stickQuantity -= pickupQuantity;
+
                             currentPlayer = 0;
                         }
 
@@ -117,6 +121,10 @@ namespace fall_2020_starter_code
                     score[0] = 0;
                     score[1] = 0;
                 }
+                Console.WriteLine($"There are {energyPoints[0]} Energy Points left! \n\n Press any key to return to the main menu!");
+                Console.ReadKey();
+                Console.Clear();
+                exit = 1;
             }
         }
         static int GetQuantity(string item)
@@ -222,17 +230,51 @@ namespace fall_2020_starter_code
             }
             return rndChoice;
         }
-        static void MotherMayI()
+        static void MotherMayI(int[] energyPoints,int[] score,int[] wins,int[] games)
         {
 
         }
-        static void Scoreboard()
+        static void Scoreboard(int[] energyPoints,int[] score,int[] wins,int[] games)
         {
-
+            Console.Clear();
+            if (energyPoints[0] <= 200)
+            {
+                Console.WriteLine($"The babysitter has expended {200-energyPoints[0]} Emergy Points!");
+            }
+            else
+            {
+                Console.WriteLine($"Oh No! The babysitter has increased the Energy Points by {energyPoints[0]-200}!");
+            }
+            Console.WriteLine($"The Children have {energyPoints[0]} Energy Points left!");
+            Console.WriteLine($"The babysitter has won {wins[0]} games!");
+            Console.WriteLine($"The babysitter has lost {wins[1]} games!");
+            Console.WriteLine("\n\nPress any key to continue!");
+            Console.ReadKey();
+            Console.Clear();
         }
-        static void ResetGame()
+        static void ResetGame(int[] energyPoints,int[] score,int[] wins,int[] games)
         {
+            Console.Clear();
+            Console.Write("Are you sure you want to reset the scoreboard? All progress will be lost. (Y/N): ");
+            string userInput = Console.ReadLine().ToUpper();
+            switch(userInput)
+            {
+                case "Y":
+                energyPoints[0] = 200;
+                score[0] =0;
+                score[1] = 0;
+                wins[0] = 0;
+                wins[1] = 0;
+                games[0] = 0;
+                Console.WriteLine("Scoreboard has been reset. Press any key to continue.");
+                break;
 
+                default: 
+                Console.WriteLine("The Scoreboard was not reset based on user input. \n\n Press any key to return to the main menu.");
+                break;
+            }
+            Console.ReadKey();
+            Console.Clear();
         }
     }
 }
