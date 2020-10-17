@@ -12,6 +12,7 @@ namespace fall_2020_starter_code
             energyPoints[0] = 200;
             int[] score = new int[2];
             int[] wins = new int[2];
+            int[] games = {0};
             while (exit == 0)
             {
                 int userChoice = ChooseProgram();
@@ -19,7 +20,7 @@ namespace fall_2020_starter_code
                 switch(userChoice)
                 {
                     case 1:
-                    PickUpSticks(energyPoints,score,wins);
+                    PickUpSticks(energyPoints,score,wins,games);
                     break;
 
                     case 2:
@@ -50,34 +51,71 @@ namespace fall_2020_starter_code
             Console.WriteLine("5:   Exit Game");
             return int.Parse(Console.ReadLine());
         }   
-        static void PickUpSticks(int[] energyPoints,int[] score,int[] wins)
+        static void PickUpSticks(int[] energyPoints,int[] score,int[] wins,int[] games)
         {
             energyPoints[1] = energyPoints[0];
+            int playGame = 1;
             while (energyPoints[1] < 300 && energyPoints[0] > 0)
-            {
-                int playGame = 1;
+            {            
                 string lastPlayer = "user";
                 int currentPlayer = 0;
-                while (playGame == 1)
+                while (playGame != 0)
                 {
                     int stickQuantity = GetQuantity("stick");
+                    int initialStickQuantity = stickQuantity;
                     while (stickQuantity > 0)
                     {
                         while (currentPlayer == 0)
                         {
                             int pickupQuantity = GetQuantity("pickup");
+                            lastPlayer = "user";
                             stickQuantity -= pickupQuantity;
                             score[0] += pickupQuantity;
                             energyPoints[1] -= pickupQuantity;
-                            lastPlayer = "user";
                             currentPlayer = 1;
                         }
                         while (currentPlayer == 1)
                         {
                             int pickupQuantity = ComputerPickupQuantity(stickQuantity);
+                            lastPlayer = "computer";
+                            stickQuantity -= pickupQuantity;
+                            score[1] += pickupQuantity;
+                            energyPoints[1] += pickupQuantity;
+                            Console.WriteLine($"The computer picked up {pickupQuantity} sticks.");
+                            currentPlayer = 0;
                         }
 
                     }
+                    switch(lastPlayer)
+                    {
+                        //If computer loses, user's score is subtracted from EP, and user wins increases by 1.
+                        case "computer":
+                        Console.WriteLine($"Computer Loses, there were {initialStickQuantity} sticks in this round.");
+                        energyPoints[0] -= score[0];
+                        wins[0]++;
+                        break;
+
+                        //If user loses, computer's score is added to EP, and computer wins increases by 1.
+                        case "user":
+                        Console.WriteLine($"User Loses, there were {initialStickQuantity} sticks in this round.");
+                        energyPoints[0] += score[1];
+                        wins[1]++;
+                        break;
+
+                        default:
+                        Console.WriteLine("An unexpected error occurred in the lastPlayer switch.");
+                        break;
+                    }
+                    games[0]++;
+                    Console.WriteLine("Would you like to play this game again? \n 0:   No\n 1:   Yes");
+                    string keepPlaying = Console.ReadLine();
+                    if (int.Parse(keepPlaying) == 0)
+                    {
+                        playGame = 0;
+                    }
+                    energyPoints[1] = energyPoints[0];
+                    score[0] = 0;
+                    score[1] = 0;
                 }
             }
         }
@@ -90,36 +128,77 @@ namespace fall_2020_starter_code
                 case "stick":
                 while (valid == 0)
                 {
-                    Console.Write("How many sticks would you like to place in the pile? (Between 20 and 100):     ");
-                    quantity = int.Parse(Console.ReadLine());
-                    if (quantity <= 100 && quantity >= 20)
+                    Console.Write("How many sticks would you like to place in the pile? (Between 20 and 100)(R for Random Choice):     ");
+                    string userInput = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(userInput))
                     {
-                        valid = 1;
+                        if (userInput.ToUpper() == "R")
+                        {
+                            Random randomNumber = new Random();
+                            quantity = randomNumber.Next(80);
+                            quantity += 20;
+                        }
+                        else if (int.TryParse(userInput, out quantity))
+                        {
+                            quantity = int.Parse(userInput);
+                            if (quantity <= 100 && quantity >= 20)
+                            {
+                                valid = 1;
+                            }
+                            else
+                            {
+                                Console.WriteLine("That number is not inside the allowed range, please try again.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid Input");
+                        }
+                        if (quantity <= 100 && quantity >= 20)
+                        {
+                            valid = 1;
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("That number is not inside the allowed range, please try again.");
+                        Console.WriteLine("No input detected, please try again.");
                     }
+                    
                 }
+                Console.Clear();
                 break;
 
                 case "pickup":
                 while (valid == 0)
                 {
                     Console.Write("How many sticks would you like to pick up from the pile? (1, 2, or 3):     ");
-                    quantity = int.Parse(Console.ReadLine());
-                    if (quantity <= 3 && quantity >= 1)
+                    string userInput = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(userInput))
                     {
-                        valid = 1;
+                        if (int.TryParse(userInput, out quantity))
+                        {
+                            quantity = int.Parse(userInput);              
+                            if (quantity <= 3 && quantity >= 1)
+                            {
+                                valid = 1;
+                            }
+                            else
+                            {
+                                Console.WriteLine("That number is not inside the allowed range, please try again.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Input must be numeric, please try again.");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("That number is not inside the allowed range, please try again.");
+                        Console.WriteLine("No input detected, please try again.");
                     }
                 }
                 break;
             }
-            Console.Clear();
             return quantity;
         }
         static int ComputerPickupQuantity(int stickQuantity)
